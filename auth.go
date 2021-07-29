@@ -96,15 +96,15 @@ func GetUserAccessToken() string {
 
 // Login Authenticates the existing user using email and password
 func Login(email, password string) (output AuthOutput, err error) {
-	if apiKey == nil || email == "" || password == "" {
-		err = errors.New("api key, email or password is missing")
+	if accountId == nil || email == "" || password == "" {
+		err = errors.New("account, email or password is missing")
 		return
 	}
 
 	values := map[string]string{
-		"api_key":  *apiKey,
-		"email":    email,
-		"password": password,
+		"account_uuid": *accountId,
+		"email":        email,
+		"password":     password,
 	}
 	jsonData, err := json.Marshal(values)
 	if err != nil {
