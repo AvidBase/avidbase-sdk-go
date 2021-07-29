@@ -6,7 +6,6 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 var baseUrl string
@@ -18,12 +17,11 @@ var machineAccessToken *string
 var userAccessToken *string
 
 type OutputUser struct {
-	ID        string    `json:"id"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	Email     string    `json:"email"`
-	Status    int64     `json:"status"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        string `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Status    int64  `json:"status"`
 }
 
 type AuthOutput struct {
