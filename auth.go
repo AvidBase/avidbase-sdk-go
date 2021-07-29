@@ -1,4 +1,4 @@
-package go_auth
+package avidbase
 
 import (
 	"bytes"
@@ -6,7 +6,6 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 var baseUrl string
@@ -29,26 +28,29 @@ type AuthOutput struct {
 	Permissions map[string]bool `json:"permissions"`
 }
 
-type ListUser struct {
-	ID              string    `json:"id"`
-	HashedEmail     string    `json:"email"`
-	HashedPassword  string    `json:"password"`
-	AccessKey       string    `json:"access_key"`
-	InvalidAttempts int64     `json:"invalid_attempts"`
-	LastAccountId   int64     `json:"last_account_id"`
-	Status          int64     `json:"status"`
-	CreatedAt       time.Time `json:"created_at"`
-}
-
 type User struct {
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
+	ID        string                 `json:"id"`
+	FirstName string                 `json:"first_name"`
+	LastName  string                 `json:"last_name"`
+	Email     string                 `json:"email"`
+	Country   string                 `json:"country"`
+	Data      map[string]interface{} `json:"data"`
 }
 
-func Init(account, key string) {
-	baseUrl = "https://dev-api.avidbase.com/"
+type UserRequest struct {
+	FirstName *string                `json:"first_name"`
+	LastName  *string                `json:"last_name"`
+	Email     *string                `json:"email"`
+	Password  *string                `json:"password"`
+	Data      map[string]interface{} `json:"data"`
+}
+
+func Init(account, key string, isProduction bool) {
+	if isProduction {
+		baseUrl = "https://api.avidbase.com/"
+	} else {
+		baseUrl = "https://dev-api.avidbase.com/"
+	}
 	accountId = &account
 	apiKey = &key
 }
@@ -151,8 +153,8 @@ func Login(email, password string) (output AuthOutput, err error) {
 }
 
 // ListUsers Lists all the users using machine access token
-func ListUsers() (users []ListUser, err error) {
-	users = make([]ListUser, 0)
+func ListUsers() (users []User, err error) {
+	users = make([]User, 0)
 
 	if !isValidMachineAccessToken() {
 		err = errors.New("invalid api key or unable to generate machine access token")
@@ -195,8 +197,51 @@ func ListUsers() (users []ListUser, err error) {
 	return
 }
 
+// GetUser Get a user using user id and machine access token
+func GetUser(userId string) (user User, err error) {
+	if !isValidMachineAccessToken() {
+		err = errors.New("invalid api key or unable to generate machine access token")
+		return
+	}
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", baseUrl+"v1/user/"+userId, nil)
+	if err != nil {
+		err = errors.New("unable to create a get user request")
+		return
+	}
+
+	req.Header.Set("Access-Token", *machineAccessToken)
+	resp, err := client.Do(req)
+	if err != nil {
+		err = errors.New("unable to make a get user call")
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		err = errors.New("get users failed, status code: " + strconv.Itoa(resp.StatusCode))
+		return
+	}
+
+	// Set the user access token if it exists
+	if resp.Header.Get("Access-Token") != "" {
+		accessToken := resp.Header.Get("Access-Token")
+		userAccessToken = &accessToken
+	}
+
+	//Decode the data
+	err = json.NewDecoder(resp.Body).Decode(&user)
+	if err != nil {
+		err = errors.New("unable to decode a get user response")
+		return
+	}
+
+	return
+}
+
 // CreateUser Creates a new user using machine access token
-func CreateUser(user User) (err error) {
+func CreateUser(user UserRequest) (err error) {
 	if !isValidMachineAccessToken() {
 		err = errors.New("invalid api key or unable to generate machine access token")
 		return
@@ -238,7 +283,7 @@ func CreateUser(user User) (err error) {
 }
 
 // UpdateUser Updates an existing user using user id and machine access token
-func UpdateUser(userId string, user User) (err error) {
+func UpdateUser(userId string, user UserRequest) (err error) {
 	if !isValidMachineAccessToken() {
 		err = errors.New("invalid api key or unable to generate machine access token")
 		return
@@ -277,4 +322,18 @@ func UpdateUser(userId string, user User) (err error) {
 	}
 
 	return
+}
+
+// String returns a pointer to the string value passed in.
+func String(v string) *string {
+	return &v
+}
+
+// StringValue returns the value of the string pointer passed in or
+// "" if the pointer is nil.
+func StringValue(v *string) string {
+	if v != nil {
+		return *v
+	}
+	return ""
 }
