@@ -1,1 +1,1 @@
-# go-auth
+# avidbase-sdk-go
