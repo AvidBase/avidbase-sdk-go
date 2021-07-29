@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 var baseUrl string
@@ -16,7 +17,7 @@ var apiKey *string
 var machineAccessToken *string
 var userAccessToken *string
 
-type OutputUser struct {
+type outputUser struct {
 	ID        string `json:"id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
@@ -24,8 +25,20 @@ type OutputUser struct {
 }
 
 type AuthOutput struct {
-	User        OutputUser      `json:"user"`
+	User        outputUser      `json:"user"`
 	Permissions map[string]bool `json:"permissions"`
+}
+
+type ListUser struct {
+	ID              string    `json:"id"`
+	Email           string    `json:"email"`
+	Password        string    `json:"password"`
+	AccessKey       string    `json:"access_key"`
+	TransferToken   string    `json:"-"`
+	InvalidAttempts int64     `json:"invalid_attempts"`
+	LastAccountId   int64     `json:"last_account_id"`
+	Status          int64     `json:"status"`
+	CreatedAt       time.Time `json:"created_at"`
 }
 
 type User struct {
@@ -139,8 +152,8 @@ func Login(email, password string) (output AuthOutput, err error) {
 }
 
 // ListUsers Lists all the users using machine access token
-func ListUsers() (users []OutputUser, err error) {
-	users = make([]OutputUser, 0)
+func ListUsers() (users []ListUser, err error) {
+	users = make([]ListUser, 0)
 
 	if !isValidMachineAccessToken() {
 		err = errors.New("invalid api key or unable to generate machine access token")
@@ -177,49 +190,6 @@ func ListUsers() (users []OutputUser, err error) {
 	err = json.NewDecoder(resp.Body).Decode(&users)
 	if err != nil {
 		err = errors.New("unable to decode a list users response")
-		return
-	}
-
-	return
-}
-
-// LoadUser Gets the users using machine access token
-func LoadUser(userId string) (user OutputUser, err error) {
-	if !isValidMachineAccessToken() {
-		err = errors.New("invalid api key or unable to generate machine access token")
-		return
-	}
-
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", baseUrl+"v1/user/"+userId, nil)
-	if err != nil {
-		err = errors.New("unable to create a get user request")
-		return
-	}
-
-	req.Header.Set("Access-Token", *machineAccessToken)
-	resp, err := client.Do(req)
-	if err != nil {
-		err = errors.New("unable to make a get user call")
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		err = errors.New("get user failed, status code: " + strconv.Itoa(resp.StatusCode))
-		return
-	}
-
-	// Set the user access token if it exists
-	if resp.Header.Get("Access-Token") != "" {
-		accessToken := resp.Header.Get("Access-Token")
-		userAccessToken = &accessToken
-	}
-
-	//Decode the data
-	err = json.NewDecoder(resp.Body).Decode(&user)
-	if err != nil {
-		err = errors.New("unable to decode a get user response")
 		return
 	}
 
