@@ -41,9 +41,9 @@ func Init(account, key string) {
 	apiKey = &key
 }
 
-// IsValidMachineAccessToken Validates whether the machine access token is available or not
+// isValidMachineAccessToken Validates whether the machine access token is available or not
 // if not available generate a new machine access token
-func IsValidMachineAccessToken() bool {
+func isValidMachineAccessToken() bool {
 	if machineAccessToken == nil {
 		if !generateMachineAccessToken() {
 			return false
@@ -52,7 +52,7 @@ func IsValidMachineAccessToken() bool {
 	return true
 }
 
-// Generate a new machine access token using api key
+// generateMachineAccessToken Generates a new machine access token using api key
 func generateMachineAccessToken() bool {
 	if accountId == nil || apiKey == nil {
 		return false
@@ -132,7 +132,7 @@ func Login(email, password string) (output AuthOutput) {
 func ListUsers() (users []OutputUser) {
 	users = make([]OutputUser, 0)
 
-	if IsValidMachineAccessToken() {
+	if isValidMachineAccessToken() {
 		client := &http.Client{}
 		req, err := http.NewRequest("GET", baseUrl+"v1/user", nil)
 		if err != nil {
@@ -162,7 +162,7 @@ func ListUsers() (users []OutputUser) {
 
 // LoadUser Gets the users using machine access token
 func LoadUser(userId string) (user OutputUser) {
-	if IsValidMachineAccessToken() {
+	if isValidMachineAccessToken() {
 		client := &http.Client{}
 		req, err := http.NewRequest("GET", baseUrl+"v1/user/"+userId, nil)
 		if err != nil {
@@ -192,7 +192,7 @@ func LoadUser(userId string) (user OutputUser) {
 
 // CreateUser Creates a new user using machine access token
 func CreateUser(user User) bool {
-	if IsValidMachineAccessToken() {
+	if isValidMachineAccessToken() {
 		client := &http.Client{}
 		jsonData, err := json.Marshal(user)
 		if err != nil {
@@ -219,7 +219,7 @@ func CreateUser(user User) bool {
 
 // UpdateUser Updates an existing user using user id and machine access token
 func UpdateUser(userId string, user User) bool {
-	if IsValidMachineAccessToken() {
+	if isValidMachineAccessToken() {
 		client := &http.Client{}
 		jsonData, err := json.Marshal(user)
 		if err != nil {
