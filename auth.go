@@ -139,7 +139,7 @@ func ListUsers() (users []OutputUser) {
 			return
 		}
 
-		req.Header.Set("Access-Token", *userAccessToken)
+		req.Header.Set("Access-Token", *machineAccessToken)
 		resp, err := client.Do(req)
 		if err != nil {
 			return
@@ -169,7 +169,7 @@ func LoadUser(userId string) (user OutputUser) {
 			return
 		}
 
-		req.Header.Set("Access-Token", *userAccessToken)
+		req.Header.Set("Access-Token", *machineAccessToken)
 		resp, err := client.Do(req)
 		if err != nil {
 			return
@@ -202,7 +202,7 @@ func CreateUser(user User) bool {
 		if err != nil {
 			return false
 		}
-		req.Header.Set("Access-Token", *userAccessToken)
+		req.Header.Set("Access-Token", *machineAccessToken)
 
 		resp, err := client.Do(req)
 		if err != nil {
@@ -229,7 +229,7 @@ func UpdateUser(userId string, user User) bool {
 		if err != nil {
 			return false
 		}
-		req.Header.Set("Access-Token", *userAccessToken)
+		req.Header.Set("Access-Token", *machineAccessToken)
 
 		resp, err := client.Do(req)
 		if err != nil {
