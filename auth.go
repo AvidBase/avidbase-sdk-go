@@ -31,10 +31,9 @@ type AuthOutput struct {
 
 type ListUser struct {
 	ID              string    `json:"id"`
-	Email           string    `json:"email"`
-	Password        string    `json:"password"`
+	HashedEmail     string    `json:"email"`
+	HashedPassword  string    `json:"password"`
 	AccessKey       string    `json:"access_key"`
-	TransferToken   string    `json:"-"`
 	InvalidAttempts int64     `json:"invalid_attempts"`
 	LastAccountId   int64     `json:"last_account_id"`
 	Status          int64     `json:"status"`
