@@ -211,7 +211,7 @@ func GetUser(userId string) (user Identity, err error) {
 }
 
 // CreateUser Creates a new user using machine access token
-func CreateUser(user User) (err error) {
+func CreateUser(user User) (identity Identity, err error) {
 	if !isValidMachineAccessToken() {
 		err = errors.New("invalid api key or unable to generate machine access token")
 		return
@@ -243,11 +243,18 @@ func CreateUser(user User) (err error) {
 		return
 	}
 
+	//Decode the data
+	err = json.NewDecoder(resp.Body).Decode(&identity)
+	if err != nil {
+		err = errors.New("unable to decode a create user response")
+		return
+	}
+
 	return
 }
 
 // UpdateUser Updates an existing user using user id and machine access token
-func UpdateUser(userId string, user User) (err error) {
+func UpdateUser(userId string, user User) (identity Identity, err error) {
 	if !isValidMachineAccessToken() {
 		err = errors.New("invalid api key or unable to generate machine access token")
 		return
@@ -276,6 +283,13 @@ func UpdateUser(userId string, user User) (err error) {
 
 	if resp.StatusCode != http.StatusOK {
 		err = errors.New("update user failed, status code: " + strconv.Itoa(resp.StatusCode))
+		return
+	}
+
+	//Decode the data
+	err = json.NewDecoder(resp.Body).Decode(&identity)
+	if err != nil {
+		err = errors.New("unable to decode an update user response")
 		return
 	}
 
