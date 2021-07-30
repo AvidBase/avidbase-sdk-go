@@ -15,19 +15,12 @@ var apiKey *string
 
 var machineAccessToken *string
 
-type outputUser struct {
-	ID        string `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
-}
-
 type AuthOutput struct {
-	User        outputUser      `json:"user"`
+	User        Identity        `json:"user"`
 	Permissions map[string]bool `json:"permissions"`
 }
 
-type User struct {
+type Identity struct {
 	ID        string                 `json:"id"`
 	FirstName string                 `json:"first_name"`
 	LastName  string                 `json:"last_name"`
@@ -36,7 +29,7 @@ type User struct {
 	Data      map[string]interface{} `json:"data"`
 }
 
-type UserRequest struct {
+type User struct {
 	FirstName *string                `json:"first_name"`
 	LastName  *string                `json:"last_name"`
 	Email     *string                `json:"email"`
@@ -122,7 +115,6 @@ func Login(email, password string) (accessToken string, output AuthOutput, err e
 		err = errors.New("access token missing")
 		return
 	}
-	accessToken = resp.Header.Get("Access-Token")
 
 	if resp.StatusCode != http.StatusOK {
 		err = errors.New("authentication failed, status code: " + strconv.Itoa(resp.StatusCode))
@@ -136,12 +128,14 @@ func Login(email, password string) (accessToken string, output AuthOutput, err e
 		return
 	}
 
+	accessToken = resp.Header.Get("Access-Token")
+
 	return
 }
 
 // ListUsers Lists all the users using machine access token
-func ListUsers() (users []User, err error) {
-	users = make([]User, 0)
+func ListUsers() (users []Identity, err error) {
+	users = make([]Identity, 0)
 
 	if !isValidMachineAccessToken() {
 		err = errors.New("invalid api key or unable to generate machine access token")
@@ -179,7 +173,7 @@ func ListUsers() (users []User, err error) {
 }
 
 // GetUser Get a user using user id and machine access token
-func GetUser(userId string) (user User, err error) {
+func GetUser(userId string) (user Identity, err error) {
 	if !isValidMachineAccessToken() {
 		err = errors.New("invalid api key or unable to generate machine access token")
 		return
@@ -216,7 +210,7 @@ func GetUser(userId string) (user User, err error) {
 }
 
 // CreateUser Creates a new user using machine access token
-func CreateUser(user UserRequest) (err error) {
+func CreateUser(user User) (err error) {
 	if !isValidMachineAccessToken() {
 		err = errors.New("invalid api key or unable to generate machine access token")
 		return
@@ -252,7 +246,7 @@ func CreateUser(user UserRequest) (err error) {
 }
 
 // UpdateUser Updates an existing user using user id and machine access token
-func UpdateUser(userId string, user UserRequest) (err error) {
+func UpdateUser(userId string, user User) (err error) {
 	if !isValidMachineAccessToken() {
 		err = errors.New("invalid api key or unable to generate machine access token")
 		return
