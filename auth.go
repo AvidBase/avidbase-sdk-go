@@ -111,7 +111,7 @@ func Login(email, password string) (accessToken string, output AuthOutput, err e
 	defer resp.Body.Close()
 
 	// Set the user access token if it exists
-	if resp.Header.Get("Access-Token") != "" {
+	if resp.Header.Get("Access-Token") == "" {
 		err = errors.New("access token missing")
 		return
 	}
