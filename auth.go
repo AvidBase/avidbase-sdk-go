@@ -14,7 +14,6 @@ var accountId *string
 var apiKey *string
 
 var machineAccessToken *string
-var userAccessToken *string
 
 type outputUser struct {
 	ID        string `json:"id"`
@@ -93,21 +92,8 @@ func generateMachineAccessToken() bool {
 	return true
 }
 
-// IsLoggedIn Returns whether the user is logged in or not
-func IsLoggedIn() bool {
-	return userAccessToken != nil && *userAccessToken != ""
-}
-
-// GetUserAccessToken Returns user access token if available after logging in
-func GetUserAccessToken() string {
-	if userAccessToken == nil {
-		return ""
-	}
-	return *userAccessToken
-}
-
 // Login Authenticates the existing user using email and password
-func Login(email, password string) (output AuthOutput, err error) {
+func Login(email, password string) (accessToken string, output AuthOutput, err error) {
 	if accountId == nil || email == "" || password == "" {
 		err = errors.New("account, email or password is missing")
 		return
@@ -133,19 +119,20 @@ func Login(email, password string) (output AuthOutput, err error) {
 
 	// Set the user access token if it exists
 	if resp.Header.Get("Access-Token") != "" {
-		accessToken := resp.Header.Get("Access-Token")
-		userAccessToken = &accessToken
+		err = errors.New("access token missing")
+		return
+	}
+	accessToken = resp.Header.Get("Access-Token")
+
+	if resp.StatusCode != http.StatusOK {
+		err = errors.New("authentication failed, status code: " + strconv.Itoa(resp.StatusCode))
+		return
 	}
 
-	if resp.StatusCode == http.StatusOK {
-		//Decode the data
-		err = json.NewDecoder(resp.Body).Decode(&output)
-		if err != nil {
-			err = errors.New("unable to decode auth response")
-			return
-		}
-	} else {
-		err = errors.New("authentication failed, status code: " + strconv.Itoa(resp.StatusCode))
+	//Decode the data
+	err = json.NewDecoder(resp.Body).Decode(&output)
+	if err != nil {
+		err = errors.New("unable to decode auth response")
 		return
 	}
 
@@ -179,12 +166,6 @@ func ListUsers() (users []User, err error) {
 	if resp.StatusCode != http.StatusOK {
 		err = errors.New("list users failed, status code: " + strconv.Itoa(resp.StatusCode))
 		return
-	}
-
-	// Set the user access token if it exists
-	if resp.Header.Get("Access-Token") != "" {
-		accessToken := resp.Header.Get("Access-Token")
-		userAccessToken = &accessToken
 	}
 
 	//Decode the data
@@ -222,12 +203,6 @@ func GetUser(userId string) (user User, err error) {
 	if resp.StatusCode != http.StatusOK {
 		err = errors.New("get users failed, status code: " + strconv.Itoa(resp.StatusCode))
 		return
-	}
-
-	// Set the user access token if it exists
-	if resp.Header.Get("Access-Token") != "" {
-		accessToken := resp.Header.Get("Access-Token")
-		userAccessToken = &accessToken
 	}
 
 	//Decode the data
@@ -273,12 +248,6 @@ func CreateUser(user UserRequest) (err error) {
 		return
 	}
 
-	// Set the user access token if it exists
-	if resp.Header.Get("Access-Token") != "" {
-		accessToken := resp.Header.Get("Access-Token")
-		userAccessToken = &accessToken
-	}
-
 	return
 }
 
@@ -313,12 +282,6 @@ func UpdateUser(userId string, user UserRequest) (err error) {
 	if resp.StatusCode != http.StatusOK {
 		err = errors.New("update user failed, status code: " + strconv.Itoa(resp.StatusCode))
 		return
-	}
-
-	// Set the user access token if it exists
-	if resp.Header.Get("Access-Token") != "" {
-		accessToken := resp.Header.Get("Access-Token")
-		userAccessToken = &accessToken
 	}
 
 	return
