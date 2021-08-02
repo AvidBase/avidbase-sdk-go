@@ -119,14 +119,14 @@ func Login(emailOrUsername, password string) (accessToken string, output AuthOut
 	}
 	defer resp.Body.Close()
 
-	// Check if the access token is available or not
-	if resp.Header.Get("Access-Token") == "" {
-		err = errors.New("access token missing")
+	if resp.StatusCode != http.StatusOK {
+		err = errors.New("authentication failed, status code: " + strconv.Itoa(resp.StatusCode))
 		return
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		err = errors.New("authentication failed, status code: " + strconv.Itoa(resp.StatusCode))
+	// Check if the access token is available or not
+	if resp.Header.Get("Access-Token") == "" {
+		err = errors.New("access token missing")
 		return
 	}
 
