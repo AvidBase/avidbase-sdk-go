@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"net/mail"
 	"strconv"
@@ -120,8 +121,12 @@ func Login(emailOrUsername, password string) (accessToken string, output AuthOut
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		err = errors.New("authentication failed, status code: " + strconv.Itoa(resp.StatusCode))
-		return
+		errorMessage, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			err = errors.New("authentication failed, status code: " + strconv.Itoa(resp.StatusCode))
+			return
+		}
+		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
 	}
 
 	// Check if the access token is available or not
@@ -168,8 +173,12 @@ func ListUsers() (users []Identity, err error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		err = errors.New("list users failed, status code: " + strconv.Itoa(resp.StatusCode))
-		return
+		errorMessage, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			err = errors.New("list users failed, status code: " + strconv.Itoa(resp.StatusCode))
+			return
+		}
+		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
 	}
 
 	//Decode the data
@@ -205,8 +214,12 @@ func GetUser(userId string) (user Identity, err error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		err = errors.New("get users failed, status code: " + strconv.Itoa(resp.StatusCode))
-		return
+		errorMessage, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			err = errors.New("get user failed, status code: " + strconv.Itoa(resp.StatusCode))
+			return
+		}
+		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
 	}
 
 	//Decode the data
@@ -248,8 +261,12 @@ func CreateUser(user User) (identity Identity, err error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		err = errors.New("create user failed, status code: " + strconv.Itoa(resp.StatusCode))
-		return
+		errorMessage, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			err = errors.New("create user failed, status code: " + strconv.Itoa(resp.StatusCode))
+			return
+		}
+		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
 	}
 
 	//Decode the data
@@ -291,8 +308,12 @@ func UpdateUser(userId string, user User) (identity Identity, err error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		err = errors.New("update user failed, status code: " + strconv.Itoa(resp.StatusCode))
-		return
+		errorMessage, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			err = errors.New("update user failed, status code: " + strconv.Itoa(resp.StatusCode))
+			return
+		}
+		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
 	}
 
 	//Decode the data
