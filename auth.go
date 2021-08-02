@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/mail"
 	"strconv"
 )
 
@@ -24,6 +25,7 @@ type Identity struct {
 	ID        string                 `json:"id"`
 	FirstName string                 `json:"first_name"`
 	LastName  string                 `json:"last_name"`
+	Username  string                 `json:"username"`
 	Email     string                 `json:"email"`
 	Country   string                 `json:"country"`
 	Data      map[string]interface{} `json:"data"`
@@ -32,6 +34,7 @@ type Identity struct {
 type User struct {
 	FirstName *string                `json:"first_name"`
 	LastName  *string                `json:"last_name"`
+	Username  *string                `json:"username"`
 	Email     *string                `json:"email"`
 	Password  *string                `json:"password"`
 	Data      map[string]interface{} `json:"data"`
@@ -85,21 +88,27 @@ func generateMachineAccessToken() bool {
 	return true
 }
 
-// Login Authenticates the existing user using email and password
-func Login(email, password string) (accessToken string, output AuthOutput, err error) {
-	if accountId == nil || email == "" || password == "" {
-		err = errors.New("account, email or password is missing")
+// Login Authenticates the existing user using email/username and password
+func Login(emailOrUsername, password string) (accessToken string, output AuthOutput, err error) {
+	if accountId == nil || emailOrUsername == "" || password == "" {
+		err = errors.New("account, email/username or password is missing")
 		return
 	}
 
 	values := map[string]string{
 		"account_uuid": *accountId,
-		"email":        email,
 		"password":     password,
 	}
+	_, err = mail.ParseAddress(emailOrUsername)
+	if err != nil {
+		values["email"] = emailOrUsername
+	} else {
+		values["username"] = emailOrUsername
+	}
+
 	jsonData, err := json.Marshal(values)
 	if err != nil {
-		err = errors.New("unable to json encode given api key, email and password")
+		err = errors.New("unable to json encode given api key, email/username and password")
 		return
 	}
 
