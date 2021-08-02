@@ -121,8 +121,8 @@ func Login(emailOrUsername, password string) (accessToken string, output AuthOut
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		errorMessage, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
+		errorMessage, readErr := ioutil.ReadAll(resp.Body)
+		if readErr != nil {
 			err = errors.New("authentication failed, status code: " + strconv.Itoa(resp.StatusCode))
 			return
 		}
@@ -174,8 +174,8 @@ func ListUsers() (users []Identity, err error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		errorMessage, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
+		errorMessage, readErr := ioutil.ReadAll(resp.Body)
+		if readErr != nil {
 			err = errors.New("list users failed, status code: " + strconv.Itoa(resp.StatusCode))
 			return
 		}
@@ -216,8 +216,8 @@ func GetUser(userId string) (user Identity, err error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		errorMessage, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
+		errorMessage, readErr := ioutil.ReadAll(resp.Body)
+		if readErr != nil {
 			err = errors.New("get user failed, status code: " + strconv.Itoa(resp.StatusCode))
 			return
 		}
@@ -264,8 +264,8 @@ func CreateUser(user User) (identity Identity, err error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		errorMessage, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
+		errorMessage, readErr := ioutil.ReadAll(resp.Body)
+		if readErr != nil {
 			err = errors.New("create user failed, status code: " + strconv.Itoa(resp.StatusCode))
 			return
 		}
@@ -312,8 +312,8 @@ func UpdateUser(userId string, user User) (identity Identity, err error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		errorMessage, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
+		errorMessage, readErr := ioutil.ReadAll(resp.Body)
+		if readErr != nil {
 			err = errors.New("update user failed, status code: " + strconv.Itoa(resp.StatusCode))
 			return
 		}
