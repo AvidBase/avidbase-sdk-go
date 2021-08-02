@@ -150,6 +150,53 @@ func Login(emailOrUsername, password string) (accessToken string, output AuthOut
 	return
 }
 
+// FindUser Finds a list of user matching given email or username and machine access token
+func FindUser(emailOrUsername string) (users []Identity, err error) {
+	if !isValidMachineAccessToken() {
+		err = errors.New("invalid api key or unable to generate machine access token")
+		return
+	}
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", baseUrl+"v1/user:find", nil)
+	if err != nil {
+		err = errors.New("unable to create a find user request")
+		return
+	}
+
+	req.Header.Set("Access-Token", *machineAccessToken)
+
+	q := req.URL.Query()
+	q.Add("search_text", emailOrUsername)
+	req.URL.RawQuery = q.Encode()
+
+	resp, err := client.Do(req)
+	if err != nil {
+		err = errors.New("unable to make a find user call")
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		errorMessage, readErr := ioutil.ReadAll(resp.Body)
+		if readErr != nil {
+			err = errors.New("get user failed, status code: " + strconv.Itoa(resp.StatusCode))
+			return
+		}
+		err = errors.New(strings.Trim(string(errorMessage), "\"") + ", status code: " + strconv.Itoa(resp.StatusCode))
+		return
+	}
+
+	//Decode the data
+	err = json.NewDecoder(resp.Body).Decode(&users)
+	if err != nil {
+		err = errors.New("unable to decode a find user response")
+		return
+	}
+
+	return
+}
+
 // ListUsers Lists all the users using machine access token
 func ListUsers() (users []Identity, err error) {
 	users = make([]Identity, 0)
