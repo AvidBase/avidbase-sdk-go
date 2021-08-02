@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/mail"
 	"strconv"
+	"strings"
 )
 
 var baseUrl string
@@ -126,7 +127,7 @@ func Login(emailOrUsername, password string) (accessToken string, output AuthOut
 			err = errors.New("authentication failed, status code: " + strconv.Itoa(resp.StatusCode))
 			return
 		}
-		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
+		err = errors.New(strings.Trim(string(errorMessage), "\"") + ", status code: " + strconv.Itoa(resp.StatusCode))
 		return
 	}
 
@@ -179,7 +180,7 @@ func ListUsers() (users []Identity, err error) {
 			err = errors.New("list users failed, status code: " + strconv.Itoa(resp.StatusCode))
 			return
 		}
-		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
+		err = errors.New(strings.Trim(string(errorMessage), "\"") + ", status code: " + strconv.Itoa(resp.StatusCode))
 		return
 	}
 
@@ -221,7 +222,7 @@ func GetUser(userId string) (user Identity, err error) {
 			err = errors.New("get user failed, status code: " + strconv.Itoa(resp.StatusCode))
 			return
 		}
-		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
+		err = errors.New(strings.Trim(string(errorMessage), "\"") + ", status code: " + strconv.Itoa(resp.StatusCode))
 		return
 	}
 
@@ -269,7 +270,7 @@ func CreateUser(user User) (identity Identity, err error) {
 			err = errors.New("create user failed, status code: " + strconv.Itoa(resp.StatusCode))
 			return
 		}
-		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
+		err = errors.New(strings.Trim(string(errorMessage), "\"") + ", status code: " + strconv.Itoa(resp.StatusCode))
 		return
 	}
 
@@ -317,7 +318,7 @@ func UpdateUser(userId string, user User) (identity Identity, err error) {
 			err = errors.New("update user failed, status code: " + strconv.Itoa(resp.StatusCode))
 			return
 		}
-		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
+		err = errors.New(strings.Trim(string(errorMessage), "\"") + ", status code: " + strconv.Itoa(resp.StatusCode))
 		return
 	}
 
