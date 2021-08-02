@@ -102,9 +102,9 @@ func Login(emailOrUsername, password string) (accessToken string, output AuthOut
 	}
 	_, err = mail.ParseAddress(emailOrUsername)
 	if err != nil {
-		values["email"] = emailOrUsername
-	} else {
 		values["username"] = emailOrUsername
+	} else {
+		values["email"] = emailOrUsername
 	}
 
 	jsonData, err := json.Marshal(values)
