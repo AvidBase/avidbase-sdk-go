@@ -127,6 +127,7 @@ func Login(emailOrUsername, password string) (accessToken string, output AuthOut
 			return
 		}
 		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
+		return
 	}
 
 	// Check if the access token is available or not
@@ -179,6 +180,7 @@ func ListUsers() (users []Identity, err error) {
 			return
 		}
 		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
+		return
 	}
 
 	//Decode the data
@@ -220,6 +222,7 @@ func GetUser(userId string) (user Identity, err error) {
 			return
 		}
 		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
+		return
 	}
 
 	//Decode the data
@@ -267,6 +270,7 @@ func CreateUser(user User) (identity Identity, err error) {
 			return
 		}
 		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
+		return
 	}
 
 	//Decode the data
@@ -314,6 +318,7 @@ func UpdateUser(userId string, user User) (identity Identity, err error) {
 			return
 		}
 		err = errors.New(string(errorMessage) + ", status code: " + strconv.Itoa(resp.StatusCode))
+		return
 	}
 
 	//Decode the data
