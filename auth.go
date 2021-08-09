@@ -379,6 +379,42 @@ func UpdateUser(userId string, user User) (identity Identity, err error) {
 	return
 }
 
+// AddUserRole Add the RBAC role to the existing user using user id, machine access token and role name
+func AddUserRole(userId, roleName string) (err error) {
+	if !isValidMachineAccessToken() {
+		err = errors.New("invalid api key or unable to generate machine access token")
+		return
+	}
+
+	client := &http.Client{}
+
+	req, err := http.NewRequest("PUT", baseUrl+"v1/user/"+userId+"/role/"+roleName, nil)
+	if err != nil {
+		err = errors.New("unable to create an add user role request")
+		return
+	}
+	req.Header.Set("Access-Token", *machineAccessToken)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		err = errors.New("unable to make a add user role call")
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		errorMessage, readErr := ioutil.ReadAll(resp.Body)
+		if readErr != nil {
+			err = errors.New("add user role failed, status code: " + strconv.Itoa(resp.StatusCode))
+			return
+		}
+		err = errors.New(strings.Trim(string(errorMessage), "\"") + ", status code: " + strconv.Itoa(resp.StatusCode))
+		return
+	}
+
+	return
+}
+
 // String returns a pointer to the string value passed in.
 func String(v string) *string {
 	return &v
