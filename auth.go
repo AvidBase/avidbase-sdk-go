@@ -9,7 +9,6 @@ import (
 	"net/mail"
 	"strconv"
 	"strings"
-	"time"
 )
 
 var baseUrl string
@@ -18,7 +17,6 @@ var accountId *string
 var apiKey *string
 
 var machineAccessToken *string
-var machineAccessTokenExpiry time.Time
 
 type AuthOutput struct {
 	User        Identity        `json:"user"`
@@ -52,19 +50,12 @@ func Init(account, key string, isProduction bool) {
 	}
 	accountId = &account
 	apiKey = &key
-	machineAccessTokenExpiry = time.Now().UTC()
 }
 
 // isValidMachineAccessToken Validates whether the machine access token is available or not
 // if not available generate a new machine access token
 func isValidMachineAccessToken() bool {
-	oneHourAgo := time.Now().UTC().Add(-1 * time.Hour)
-	if machineAccessToken == nil || machineAccessTokenExpiry.After(oneHourAgo) {
-		if !generateMachineAccessToken() {
-			return false
-		}
-	}
-	return true
+	return generateMachineAccessToken()
 }
 
 // generateMachineAccessToken Generates a new machine access token using api key
@@ -90,7 +81,6 @@ func generateMachineAccessToken() bool {
 
 	accessToken := resp.Header.Get("Access-Token")
 	machineAccessToken = &accessToken
-	machineAccessTokenExpiry = time.Now().UTC().AddDate(0, 0, 1)
 
 	return true
 }
